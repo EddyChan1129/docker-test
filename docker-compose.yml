@@ -2,11 +2,12 @@ version: "3"
 services:
   web:
     build:
-      context: .
+      context: ./web
     ports:
       - "3000:3000"
     depends_on:
       - mongo
+      - postgres
 
   mongo:
     image: mongo
@@ -16,5 +17,18 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
 volumes:
   mongo_data:
+  pg_data:

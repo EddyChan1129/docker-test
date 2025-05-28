@@ -1,31 +1,49 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const express = require("express");
+const mongoose = require("mongoose");
+const { Pool } = require("pg");
 
 const app = express();
 app.use(express.json());
 
-mongoose.connect('mongodb://mongo:27017/test')
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error(err));
+// MongoDB
+mongoose.connect("mongodb://mongo:27017/test", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+const mongoSchema = new mongoose.Schema({ name: String });
+const MongoItem = mongoose.model("MongoItem", mongoSchema);
 
-const Item = mongoose.model('Item', { name: String });
+// PostgreSQL
+const pgPool = new Pool({
+  user: "user",
+  host: "postgres",
+  database: "testdb",
+  password: "password",
+  port: 5432,
+});
+pgPool.query("CREATE TABLE IF NOT EXISTS items (id SERIAL PRIMARY KEY, name TEXT)");
 
-app.get('/items', async (req, res) => {
-  const items = await Item.find();
-  res.json(items);
+// Routes - Mongo
+app.post("/mongo", async (req, res) => {
+  const newItem = new MongoItem({ name: req.body.name });
+  await newItem.save();
+  res.send(newItem);
 });
 
-app.post('/items', async (req, res) => {
-  const item = new Item({ name: req.body.name });
-  await item.save();
-  res.json(item);
+app.get("/mongo", async (req, res) => {
+  const items = await MongoItem.find();
+  res.send(items);
 });
 
-app.delete('/items/:id', async (req, res) => {
-  await Item.findByIdAndDelete(req.params.id);
-  res.sendStatus(204);
+// Routes - Postgres
+app.post("/postgres", async (req, res) => {
+  const result = await pgPool.query("INSERT INTO items(name) VALUES($1) RETURNING *", [req.body.name]);
+  res.send(result.rows[0]);
 });
 
-app.listen(3000, () => {
-  console.log('✅ Server running on http://localhost:3000');
+app.get("/postgres", async (req, res) => {
+  const result = await pgPool.query("SELECT * FROM items");
+  res.send(result.rows);
 });
+
+app.listen(3000, () => console.log("✅ Server ready at http://localhost:3000"));
