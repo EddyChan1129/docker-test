@@ -1,12 +1,16 @@
-// index.js
-const express = require('express');
+const express = require("express");
+const mongoose = require("mongoose");
+
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('🎉 Hello from Dockerized Node.js!');
+mongoose.connect("mongodb://mongo:27017/dockerdb")
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
+
+app.get("/", (req, res) => {
+  res.send("🎉 Hello from Dockerized Node + Mongo App!");
 });
 
-const port = 3000;
-app.listen(port, '0.0.0.0', () => {
-  console.log(`App running on http://localhost:${port}`);
+app.listen(3000, '0.0.0.0', () => {
+  console.log("App running on http://localhost:3000");
 });
