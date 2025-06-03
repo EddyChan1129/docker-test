@@ -4,6 +4,17 @@ services:
     build: .
     expose:
       - "3000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/testdb
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:6
+    volumes:
+      - mongo-data:/data/db
     networks:
       - app-network
 
@@ -17,6 +28,9 @@ services:
       - web
     networks:
       - app-network
+
+volumes:
+  mongo-data:
 
 networks:
   app-network:
