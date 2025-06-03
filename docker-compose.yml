@@ -1,22 +1,37 @@
 version: '3'
 services:
-  web:
-    build: .
+  frontend:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: node index.js
     expose:
       - "3000"
-    environment:
-      - MONGO_URL=mongodb://mongo:27017/testdb
-    depends_on:
-      - mongo
     networks:
-      - app-network
+      - app-net
 
-  mongo:
-    image: mongo:6
+  api:
+    image: node:18
+    working_dir: /app
     volumes:
-      - mongo-data:/data/db
+      - ./api:/app
+    command: node index.js
+    expose:
+      - "3001"
     networks:
-      - app-network
+      - app-net
+
+  admin:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./admin:/app
+    command: node index.js
+    expose:
+      - "3002"
+    networks:
+      - app-net
 
   nginx:
     image: nginx:latest
@@ -25,12 +40,11 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - web
+      - frontend
+      - api
+      - admin
     networks:
-      - app-network
-
-volumes:
-  mongo-data:
+      - app-net
 
 networks:
-  app-network:
+  app-net:
