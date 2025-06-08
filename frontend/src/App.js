@@ -17,13 +17,13 @@ function App() {
       body: JSON.stringify({ name: text })
     });
     const newItem = await res.json();
-    setItems([...items, newItem]);
+    setItems(prev => [...prev, newItem]);
     setText("");
   };
 
   const deleteItem = async (id) => {
     await fetch("/api/items/" + id, { method: "DELETE" });
-    setItems(items.filter(item => item._id !== id));
+    setItems(prev => prev.filter(item => item._id !== id));
   };
 
   return (
