@@ -23,6 +23,15 @@ app.post("/api/items", async (req, res) => {
   res.json(item);
 });
 
+app.put("/api/items/:id", async (req, res) => {
+  const item = await Item.findByIdAndUpdate(
+    req.params.id,
+    { name: req.body.name },
+    { new: true }
+  );
+  res.json(item);
+});
+
 app.delete("/api/items/:id", async (req, res) => {
   await Item.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
